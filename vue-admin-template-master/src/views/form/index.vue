@@ -39,15 +39,81 @@
       <el-form-item label="Activity form">
         <el-input v-model="form.desc" type="textarea" />
       </el-form-item>
+
+      <el-form-item label="Product Image">
+          <el-upload
+          action="#"
+          list-type="picture-card"
+          :auto-upload="false"
+          :on-change="handleUploadSuccess"
+          :file-list="fileList">
+          
+        <i slot="default" class="el-icon-plus"></i>
+        <div slot="file" slot-scope="{file}">
+          <img
+            class="el-upload-list__item-thumbnail"
+            :src="file.url" alt=""
+          >
+          <span class="el-upload-list__item-actions">
+            <span
+              class="el-upload-list__item-preview"
+              @click="handlePictureCardPreview(file)"
+            >
+              <i class="el-icon-zoom-in"></i>
+            </span>
+            <!-- <span
+              v-if="!disabled"
+              class="el-upload-list__item-delete"
+              @click="handleDownload(file)"
+            >
+              <i class="el-icon-download"></i>
+            </span> -->
+            <span
+              v-if="!disabled"
+              class="el-upload-list__item-delete"
+              @click="handleRemove(file,fileList)"
+            >
+              <i class="el-icon-delete"></i>
+            </span>
+          </span>
+        </div>
+        </el-upload>
+
+        <!-- 查看大图 -->
+        <el-dialog :visible.sync="dialogVisible">
+          <img width="100%" :src="dialogImageUrl" alt="">
+        </el-dialog>
+
+
+        <!-- <el-upload
+          action="#"
+          list-type="picture-card"
+          :on-preview="handlePictureCardPreview"
+          :on-remove="handleRemove">
+          <i class="el-icon-plus"></i>
+        </el-upload>
+        <el-dialog :visible.sync="dialogVisible">
+          <img width="100%" :src="dialogImageUrl" alt="">
+        </el-dialog> -->
+         
+
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="onSubmit">Create</el-button>
-        <el-button @click="onCancel">Cancel</el-button>
+        <!-- <el-button @click="onCancel">Cancel</el-button> -->
       </el-form-item>
     </el-form>
+
+    <!-- <img :src="imgBase64"/> -->
   </div>
 </template>
 
 <script>
+
+import {database} from "../../db.js"
+import { ref, set,push } from "firebase/database";
+import { v4 as uuidv4 } from 'uuid';
+
 export default {
   data() {
     return {
@@ -60,19 +126,98 @@ export default {
         type: [],
         resource: '',
         desc: ''
-      }
+       
+
+      },
+      dialogImageUrl: '',
+      dialogVisible: false,
+      disabled: false,
+      fileList:[],
+      imgBase64:'' 
     }
   },
   methods: {
     onSubmit() {
-      this.$message('submit!')
+      var that = this;
+      this.$message('submiting...')
+      let id = uuidv4()
+      push(ref(database, 'product/'), {
+          name: that.form.name,
+          region: that.form.region,
+          date1: that.form.date1,
+          date2: that.form.date2,
+          delivery: that.form.delivery,
+          type: that.form.type,
+          resource: that.form.resource,
+          desc: that.form.desc,
+          id:id,
+          imgaeList:that.fileList,
+          imgBse:that.imgBase64
+      }).then(()=>{
+        that.$message("submit success!!")
+        this.$router.push({path: '/product/product', replace: true})
+      }).catch((err)=>{
+        that.$message("submit failed...")
+      });
     },
     onCancel() {
       this.$message({
         message: 'cancel!',
         type: 'warning'
       })
-    }
+    },
+     handleRemove(file,fileList) {
+        const IMG = file.name
+        const index = fileList.indexOf(IMG)
+        this.fileList.splice(index, 1)
+        // console.log(this.fileList)
+        // console.log(file)
+
+      },
+      handlePictureCardPreview(file) {
+        this.dialogImageUrl = file.url;
+        this.dialogVisible = true;
+      },
+    
+      handleUploadSuccess (res, file, fileList) {
+        // console.log(res.url)
+        // console.log(res)
+        var that =this;
+        var imgStr = '';
+        this.getBase64(res.raw).then(resp=>{
+          imgStr = resp
+          that.imgBase64 = resp
+          // console.log(imgStr)
+          that.fileList.push({
+            name:res.name,
+            imageBase:imgStr,
+            url:res.url})
+        })
+        
+        //  that.fileList.push({
+        //     name:res.name,
+        //     // imageBase:imgStr,
+        //     url:res.url})
+        
+          // console.log(this.fileList)
+        // console.log(this.fileList)
+    },
+    getBase64(file){  //把图片转成base64编码
+         return new Promise(function(resolve,reject){
+             let reader=new FileReader();
+             let imgResult="";
+             reader.readAsDataURL(file);
+             reader.onload=function(){
+                 imgResult=reader.result;
+             };
+             reader.onerror=function(error){
+                 reject(error);
+             };
+             reader.onloadend=function(){
+                 resolve(imgResult);
+             }
+         })
+     },
   }
 }
 </script>

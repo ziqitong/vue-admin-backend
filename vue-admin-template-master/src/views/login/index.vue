@@ -54,6 +54,26 @@
 
 <script>
 import { validUsername } from '@/utils/validate'
+// import { initializeApp } from "firebase/app";
+// import { getAnalytics } from "firebase/analytics";
+// // TODO: Add SDKs for Firebase products that you want to use
+// // https://firebase.google.com/docs/web/setup#available-libraries
+
+// // Your web app's Firebase configuration
+// // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// const firebaseConfig = {
+//   apiKey: "AIzaSyC_GkeqdTiDBC-ZcDs-eVmXfjODrd6kB2Q",
+//   authDomain: "backend-admin-vue.firebaseapp.com",
+//   projectId: "backend-admin-vue",
+//   storageBucket: "backend-admin-vue.appspot.com",
+//   messagingSenderId: "506803955466",
+//   appId: "1:506803955466:web:0f9f05a8b020ec492e7cf3",
+//   measurementId: "G-NZN8YCZQRG"
+// };
+
+// // Initialize Firebase
+// const app = initializeApp(firebaseConfig);
+// const analytics = getAnalytics(app);
 
 export default {
   name: 'Login',

@@ -54,6 +54,17 @@ export const constantRoutes = [
       meta: { title: 'Dashboard', icon: 'dashboard' }
     }]
   },
+  {
+    path: '/product',
+    component: Layout,
+    redirect: '/product',
+    children: [{
+      path: 'product',
+      name: 'product',
+      component: () => import('@/views/products/index'),
+      meta: { title: 'Product', icon: 'el-icon-goods' }
+    }]
+  },
 
   {
     path: '/example',
