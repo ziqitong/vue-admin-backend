@@ -66,7 +66,7 @@
      <!-- </el-container> -->
 
     <el-dialog title="Edit Product" :visible.sync="dialogFormVisible">
-    <el-form ref="form" :model="form" label-width="120px">
+    <el-form ref="form" :model="form" :rules="rules" label-width="120px">
       <el-form-item 
         label="Product name"
         :rules="[
@@ -109,13 +109,14 @@
             class="el-upload-list__item-thumbnail"
             :src="file.imageBase" alt=""
           >
-          <span class="el-upload-list__item-actions">
-            <span
+           <span class="el-upload-list__item-actions">
+            <!-- <span
               class="el-upload-list__item-preview"
               @click="handlePictureCardPreview(file)"
             >
               <i class="el-icon-zoom-in"></i>
-            </span>
+            </span> -->
+
             <span
               v-if="!disabled"
               class="el-upload-list__item-delete"
@@ -128,9 +129,10 @@
         </el-upload>
 
         <!-- 查看大图 -->
-        <el-dialog :visible.sync="dialogVisible">
+         <!-- <el-dialog :visible.sync="dialogVisible">
           <img width="100%" :src="dialogImageUrl" alt="">
-        </el-dialog>
+        </el-dialog> -->
+
       </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
@@ -168,6 +170,17 @@ export default {
             key:'',
             disabled: false,
             imgBase64:'',
+            rules: {
+                name: [
+                    { required: true, message: '请输入产品名称', trigger: 'blur' }
+                ],
+                vendor: [
+                    { required: true, message: '请选择产品供应商', trigger: 'blur' }
+                ],
+                status: [
+                    { required: true, message: '请选择产品状态', trigger: 'change' }
+                ],
+                }
             }
     },
     mounted() {
@@ -189,7 +202,7 @@ export default {
     },
    
     methods: {
-         snapshotToArray(snapshot) {
+        snapshotToArray(snapshot) {
             var returnArr = [];
             snapshot.forEach(function(childSnapshot) {
                 var item = childSnapshot.val();
@@ -219,7 +232,15 @@ export default {
                 location.reload();
             })
         },
-      
+        submitForm(form) {
+            this.$refs[form].validate((valid) => {
+                if (valid) {
+                this.writeUserData()
+                } else {
+                return false;
+                }
+            });
+        },
         handleEdit(index, row) {
             // console.log(index, row);
             this.dialogFormVisible=true;
@@ -238,29 +259,46 @@ export default {
         },
         
         handleRemove(file,fileList) {
-        const IMG = file.name
-        const index = fileList.indexOf(IMG)
-        this.fileList.splice(index, 1)
+            const IMG = file.name
+            const index = fileList.indexOf(IMG)
+            this.fileList.splice(index, 1)
+            // console.log(this.fileList)
+            // console.log(file)
+
         },
-        handlePictureCardPreview(file) {
-            console.log(file)
-            this.dialogImageUrl = file.url;
-            this.dialogVisible = true;
-        },
+
+        // handlePictureCardPreview(file) {
+        //     this.dialogImageUrl = file.url;
+        //     this.dialogVisible = true;
+        // },
         
-        handleUploadSuccess (res, file, fileList) {
-            var that =this;
-            var imgStr = '';
-            this.getBase64(res.raw).then(resp=>{
-            imgStr = resp
-            that.imgBase64 = resp
-            
-            that.fileList.push({
-                name:res.name,
-                imageBase:imgStr,
-                url:res.url})
-            })
-        },
+        handleUploadSuccess (file, fileList) {
+           if(file.raw.type!=='image/jpeg' && file.raw.type!=='image/png'){
+                this.$message.error('上传头像图片只能是 JPG 格式!');
+                // console.log(fileList)
+                fileList.splice(-1,1);
+                return false;         
+            }
+            if(!(file.size / 1024 / 1024 < 2)){
+                this.$message.error('上传头像图片大小不能超过 2MB!');
+                fileList.splice(-1,1);
+                return false;
+            }
+            else{
+                var that =this;
+                var imgStr = '';
+                this.getBase64(file.raw).then(resp=>{
+                    imgStr = resp
+                    that.imgBase64 = resp
+                    // console.log(imgStr)
+                    that.fileList.push({
+                    name:file.name,
+                    imageBase:imgStr,
+                    url:file.url})
+                })
+                console.log(that.fileList)
+                }
+            },
         getBase64(file){  //把图片转成base64编码
             return new Promise(function(resolve,reject){
                 let reader=new FileReader();

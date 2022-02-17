@@ -1,46 +1,22 @@
 <template>
   <div class="app-container">
-    <el-form ref="form" :model="form" label-width="120px">
+    <el-form ref="form" :model="form" :rules="rules" label-width="120px">
       <el-form-item 
         label="Product name"
-        :rules="[
-          { required: true, message: 'Please fill product name!'},
-        ]">
+        prop="name">
         <el-input v-model="form.name" />
       </el-form-item>
-      <!-- <el-form-item label="Activity zone">
-        <el-select v-model="form.region" placeholder="please select your zone">
-          <el-option label="Zone one" value="shanghai" />
-          <el-option label="Zone two" value="beijing" />
-        </el-select>
-      </el-form-item> -->
-      <!-- <el-form-item label="Activity time">
-        <el-col :span="11">
-          <el-date-picker v-model="form.date1" type="date" placeholder="Pick a date" style="width: 100%;" />
-        </el-col>
-        <el-col :span="2" class="line">-</el-col>
-        <el-col :span="11">
-          <el-time-picker v-model="form.date2" type="fixed-time" placeholder="Pick a time" style="width: 100%;" />
-        </el-col>
-      </el-form-item> -->
+
       <el-form-item label="Instant delivery">
         <el-switch v-model="form.delivery" />
       </el-form-item>
 
       <el-form-item 
-        label="Product vendor">
+        label="Vendor"  prop="vendor">
         <el-input v-model="form.vendor" />
       </el-form-item>
 
-      <!-- <el-form-item label="Activity type">
-        <el-checkbox-group v-model="form.type">
-          <el-checkbox label="Online activities" name="type" />
-          <el-checkbox label="Promotion activities" name="type" />
-          <el-checkbox label="Offline activities" name="type" />
-          <el-checkbox label="Simple brand exposure" name="type" />
-        </el-checkbox-group>
-      </el-form-item> -->
-      <el-form-item label="Status">
+      <el-form-item label="Status" prop="status">
         <el-radio-group v-model="form.status">
           <el-radio label="Draft" />
           <el-radio label="Active" />
@@ -59,7 +35,20 @@
           list-type="picture-card"
           :auto-upload="false"
           :on-change="handleUploadSuccess"
-          :file-list="fileList">
+          :file-list="fileList"
+          > 
+          <!-- :on-change="handleUploadSuccess" -->
+          <!-- :before-upload="beforeAvatarUpload" -->
+          <!-- :on-success="handleUploadSuccess" -->
+          <!-- :on-preview="handlePictureCardPreview"
+          :on-remove="handleRemove" -->
+
+          <!-- :auto-upload="false" -->
+
+
+          <!-- :before-upload="beforeAvatarUpload"
+          :on-success="handleUploadSuccess"
+          :file-list="fileList" -->
           
         <i slot="default" class="el-icon-plus"></i>
         <div slot="file" slot-scope="{file}">
@@ -74,13 +63,7 @@
             >
               <i class="el-icon-zoom-in"></i>
             </span>
-            <!-- <span
-              v-if="!disabled"
-              class="el-upload-list__item-delete"
-              @click="handleDownload(file)"
-            >
-              <i class="el-icon-download"></i>
-            </span> -->
+
             <span
               v-if="!disabled"
               class="el-upload-list__item-delete"
@@ -97,27 +80,11 @@
           <img width="100%" :src="dialogImageUrl" alt="">
         </el-dialog>
 
-
-        <!-- <el-upload
-          action="#"
-          list-type="picture-card"
-          :on-preview="handlePictureCardPreview"
-          :on-remove="handleRemove">
-          <i class="el-icon-plus"></i>
-        </el-upload>
-        <el-dialog :visible.sync="dialogVisible">
-          <img width="100%" :src="dialogImageUrl" alt="">
-        </el-dialog> -->
-         
-
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="onSubmit">{{isCreate}}</el-button>
-        <!-- <el-button @click="onCancel">Cancel</el-button> -->
+        <el-button type="primary" @click="submitForm('form')">{{isCreate}}</el-button>
       </el-form-item>
     </el-form>
-
-    <!-- <img :src="imgBase64"/> -->
   </div>
 </template>
 
@@ -143,7 +110,19 @@ export default {
       disabled: false,
       fileList:[],
       imgBase64:'',
-      isCreate:"Create"
+      isCreate:"Create",
+
+      rules: {
+          name: [
+            { required: true, message: '请输入产品名称', trigger: 'blur' }
+          ],
+          vendor: [
+            { required: true, message: '请选择产品供应商', trigger: 'blur' }
+          ],
+          status: [
+            { required: true, message: '请选择产品状态', trigger: 'change' }
+          ],
+        }
     }
   },
 
@@ -169,48 +148,88 @@ export default {
         that.$message("submit failed...")
       });
     },
-    onCancel() {
-      this.$message({
-        message: 'cancel!',
-        type: 'warning'
-      })
-    },
-     handleRemove(file,fileList) {
-        const IMG = file.name
-        const index = fileList.indexOf(IMG)
-        this.fileList.splice(index, 1)
-        // console.log(this.fileList)
-        // console.log(file)
 
-      },
-      handlePictureCardPreview(file) {
-        this.dialogImageUrl = file.url;
-        this.dialogVisible = true;
-      },
-    
-      handleUploadSuccess (res, file, fileList) {
-        // console.log(res.url)
-        // console.log(res)
-        var that =this;
-        var imgStr = '';
-        this.getBase64(res.raw).then(resp=>{
-          imgStr = resp
-          that.imgBase64 = resp
-          // console.log(imgStr)
-          that.fileList.push({
-            name:res.name,
-            imageBase:imgStr,
-            url:res.url})
-        })
-        
-        //  that.fileList.push({
-        //     name:res.name,
-        //     // imageBase:imgStr,
-        //     url:res.url})
-        
-          // console.log(this.fileList)
-        // console.log(this.fileList)
+    submitForm(form) {
+      this.$refs[form].validate((valid) => {
+        if (valid) {
+          this.onSubmit()
+        } else {
+          return false;
+        }
+      });
     },
+
+    // beforeAvatarUpload(file) {
+    //     const isJPG = file.type === 'image/jpeg';
+    //     const isLt2M = file.size / 1024 / 1024 < 2;
+
+    //     if (!isJPG) {
+    //       this.$message.error('上传头像图片只能是 JPG 格式!');
+    //     }
+    //     if (!isLt2M) {
+    //       this.$message.error('上传头像图片大小不能超过 2MB!');
+    //     }
+    //     return isJPG && isLt2M;
+    // },
+
+    handleRemove(file,fileList) {
+      const IMG = file.name
+      const index = fileList.indexOf(IMG)
+      this.fileList.splice(index, 1)
+      // console.log(this.fileList)
+      // console.log(file)
+
+    },
+
+    handlePictureCardPreview(file) {
+      console.log(file)
+      this.dialogImageUrl = file.url;
+      this.dialogVisible = true;
+    },
+
+    // handleAvatarSuccess(res, file) {
+    //   var that =this;
+    //       var imgStr = '';
+    //       this.getBase64(res.raw).then(resp=>{
+    //         imgStr = resp
+    //         that.imgBase64 = resp
+    //         // console.log(imgStr)
+    //         that.fileList.push({
+    //           name:res.name,
+    //           imageBase:imgStr,
+    //           url:res.url})
+    //   })
+      
+    // },
+  
+    handleUploadSuccess (file, fileList) {
+        if(file.raw.type!=='image/jpeg' && file.raw.type!=='image/png'){
+          this.$message.error('上传头像图片只能是 JPG 格式!');
+            // console.log(fileList)
+            fileList.splice(-1,1);
+            return false;         
+        }
+        if(!(file.size / 1024 / 1024 < 2)){
+          this.$message.error('上传头像图片大小不能超过 2MB!');
+          fileList.splice(-1,1);
+          return false;
+        }
+        else{
+          var that =this;
+          var imgStr = '';
+          this.getBase64(file.raw).then(resp=>{
+            imgStr = resp
+            that.imgBase64 = resp
+            // console.log(imgStr)
+            that.fileList.push({
+              name:file.name,
+              imageBase:imgStr,
+              url:file.url})
+          })
+          console.log(that.fileList)
+        }
+    },
+
     getBase64(file){  //把图片转成base64编码
          return new Promise(function(resolve,reject){
              let reader=new FileReader();
@@ -226,7 +245,8 @@ export default {
                  resolve(imgResult);
              }
          })
-     },
+    },
+
   }
 }
 </script>
