@@ -4,6 +4,33 @@
             <span style="font-size: 40px ;padding-top:10px">Product</span> 
             <el-button type="primary" @click="onAddData">Add new Product</el-button>
         </el-header>
+
+        <div class = "searchTable">
+            <el-card class="box-card" style="width: 100%">
+                <!-- <div class ="el-card__body"> -->
+                <div slot="header" class="clearfix">
+                <span>筛选搜索</span>
+                <!-- <el-button style="float: right; padding: 3px 0"  type="primary" @click="searchProduct">查找</el-button> -->
+                    <div class="buttonContainer">
+                        
+                    <el-button
+                        size="mini"
+                        @click="clearSearch">重置
+                    </el-button>
+
+                    <el-button
+                        size="mini"
+                        type ="primary"
+                        @click="searchProduct">查找
+                    </el-button>
+                    </div>
+
+                </div>
+                <p>商品名称</p>
+                <el-input lable ="商品名称" v-model="keyword" placeholder="请输入内容"></el-input>
+            </el-card>
+        </div>
+        
       
       <div class = "productTable">
         <el-table
@@ -42,13 +69,13 @@
 
             <el-table-column label="操作" align="center">
                 <template slot-scope="scope">
+                     <!-- <el-button
+                    size="mini"
+                    @click="handleEdit(scope.$index, scope.row)">编辑</el-button> -->
+
                     <el-button
                     size="mini"
                     @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-                    <!-- <el-button
-                    size="mini"
-                    type="danger"
-                    @click="handleDelete(scope.$index, scope.row)">删除</el-button> -->
                     <el-popconfirm
                         title="确定删除吗？"
                         @onConfirm="handleDelete(scope.$index, scope.row)">
@@ -156,6 +183,7 @@ export default {
     data(){
         return {
             productList:[],
+            listCopy:[],
             dialogFormVisible: false,
             form: {
                 name: '',
@@ -180,8 +208,11 @@ export default {
                 status: [
                     { required: true, message: '请选择产品状态', trigger: 'change' }
                 ],
-                }
-            }
+            },
+            keyword:'',
+            productCopy:'',
+        }
+            
     },
     mounted() {
         var that = this;
@@ -190,6 +221,7 @@ export default {
             if (snapshot.exists()) {
                 this.productList = this.snapshotToArray(snapshot)
                 console.log(this.productList)
+                this.productCopy = JSON.parse(JSON.stringify(this.productList));
             } else {
                 console.log("No data available");
             }
@@ -319,6 +351,22 @@ export default {
             // console.log(this)
             this.$router.push({path: '/form/index'})
         },
+
+        searchProduct(){
+            if(this.keyword){
+                this.productList = this.productCopy;
+                var copy = this.productList.filter(el => el.name.indexOf(this.keyword)!==-1);
+                this.productList =copy;
+                console.log(this.productList)
+                // console.log(this.keyword)
+                // console.log(copy)
+                
+            }
+        },
+        clearSearch(){
+            this.productList = this.productCopy;
+            this.keyword = '';
+        }
     },
 }
 </script>
@@ -326,5 +374,12 @@ export default {
 <style>
 .productTable{
     padding: 20px;
+}
+.searchTable{
+    padding: 20px;
+}
+.buttonContainer{
+    float: right;
+    right:10;
 }
 </style>
