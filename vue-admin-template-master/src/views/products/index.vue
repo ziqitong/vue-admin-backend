@@ -69,9 +69,9 @@
 
             <el-table-column label="操作" align="center">
                 <template slot-scope="scope">
-                     <!-- <el-button
+                     <el-button
                     size="mini"
-                    @click="handleEdit(scope.$index, scope.row)">编辑</el-button> -->
+                    @click="handleView(scope.$index, scope.row)">查看</el-button>
 
                     <el-button
                     size="mini"
@@ -228,9 +228,6 @@ export default {
             }).catch((error) => {
                 console.error(error);
             });
-        // database.ref('/').on('value',e => {
-        //     console.log(e.val());
-        // });
     },
    
     methods: {
@@ -274,11 +271,24 @@ export default {
             });
         },
         handleEdit(index, row) {
-            // console.log(index, row);
+            console.log(index, row);
             this.dialogFormVisible=true;
             this.form = row
-            this.fileList=row.imgaeList
+            if(row.imgaeList){
+                this.fileList=row.imgaeList
+            }
             this.key = row.key;
+        },
+        handleView(index,row){
+            console.log(index)
+            console.log(row)
+
+            this.$router.push({
+                name:'viewPage',
+                params:{
+                    row:row
+                }
+            })
         },
 
         handleDelete(index, row) {
@@ -358,9 +368,7 @@ export default {
                 var copy = this.productList.filter(el => el.name.indexOf(this.keyword)!==-1);
                 this.productList =copy;
                 console.log(this.productList)
-                // console.log(this.keyword)
-                // console.log(copy)
-                
+        
             }
         },
         clearSearch(){

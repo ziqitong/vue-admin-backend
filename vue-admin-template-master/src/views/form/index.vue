@@ -31,24 +31,14 @@
 
       <el-form-item label="Product Image">
           <el-upload
+          class="image"
+          ref="fileList"
           action="#"
           list-type="picture-card"
           :auto-upload="false"
           :on-change="handleUploadSuccess"
           :file-list="fileList"
           > 
-          <!-- :on-change="handleUploadSuccess" -->
-          <!-- :before-upload="beforeAvatarUpload" -->
-          <!-- :on-success="handleUploadSuccess" -->
-          <!-- :on-preview="handlePictureCardPreview"
-          :on-remove="handleRemove" -->
-
-          <!-- :auto-upload="false" -->
-
-
-          <!-- :before-upload="beforeAvatarUpload"
-          :on-success="handleUploadSuccess"
-          :file-list="fileList" -->
           
         <i slot="default" class="el-icon-plus"></i>
         <div slot="file" slot-scope="{file}">
@@ -122,6 +112,9 @@ export default {
           status: [
             { required: true, message: '请选择产品状态', trigger: 'change' }
           ],
+          // image:[
+          //   { required: true, message:"请上传至少一张图片", trigger:'change'}
+          // ]
         }
     }
   },
@@ -131,6 +124,9 @@ export default {
       var that = this;
       this.$message('submiting...')
       let id = uuidv4()
+      // if(this.fileList.length<=0){
+      //   this.imgBse = ""
+      // }
       push(ref(database, 'product/'), {
           name: that.form.name,
           vendor: that.form.vendor,
@@ -159,19 +155,6 @@ export default {
       });
     },
 
-    // beforeAvatarUpload(file) {
-    //     const isJPG = file.type === 'image/jpeg';
-    //     const isLt2M = file.size / 1024 / 1024 < 2;
-
-    //     if (!isJPG) {
-    //       this.$message.error('上传头像图片只能是 JPG 格式!');
-    //     }
-    //     if (!isLt2M) {
-    //       this.$message.error('上传头像图片大小不能超过 2MB!');
-    //     }
-    //     return isJPG && isLt2M;
-    // },
-
     handleRemove(file,fileList) {
       const IMG = file.name
       const index = fileList.indexOf(IMG)
@@ -186,21 +169,6 @@ export default {
       this.dialogImageUrl = file.url;
       this.dialogVisible = true;
     },
-
-    // handleAvatarSuccess(res, file) {
-    //   var that =this;
-    //       var imgStr = '';
-    //       this.getBase64(res.raw).then(resp=>{
-    //         imgStr = resp
-    //         that.imgBase64 = resp
-    //         // console.log(imgStr)
-    //         that.fileList.push({
-    //           name:res.name,
-    //           imageBase:imgStr,
-    //           url:res.url})
-    //   })
-      
-    // },
   
     handleUploadSuccess (file, fileList) {
         if(file.raw.type!=='image/jpeg' && file.raw.type!=='image/png'){
@@ -225,9 +193,14 @@ export default {
               name:file.name,
               imageBase:imgStr,
               url:file.url})
+
+            // if(this.fileList.length>0){
+            //   this.$refs.fileList.clearValidate()
+            // }
           })
-          console.log(that.fileList)
+          // console.log(that.fileList)
         }
+       
     },
 
     getBase64(file){  //把图片转成base64编码
