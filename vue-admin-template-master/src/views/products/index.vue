@@ -283,10 +283,12 @@ export default {
             console.log(index)
             console.log(row)
 
+            let parObj = JSON.stringify(row) 
             this.$router.push({
                 name:'viewPage',
-                params:{
-                    row:row
+                //携带参数时用query，跳转后，url上会拼接参数，刷新页面后参数不会丢失，依然是那个带参数的ur
+                query:{
+                    'obj':parObj
                 }
             })
         },

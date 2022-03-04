@@ -58,8 +58,8 @@ export default {
     },
     methods: {
         getParams(){
-            const routerParams = this.$route.params.row
-            console.log(routerParams)
+            //解决刷新后页面参数消失：需用query把路径拼接到url，再用json parse成对象接受
+            const routerParams = JSON.parse(this.$route.query.obj)
             this.pageData=routerParams
         }
     },
