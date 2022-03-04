@@ -283,12 +283,21 @@ export default {
             console.log(index)
             console.log(row)
 
-            let parObj = JSON.stringify(row) 
+            // let parObj = JSON.stringify(row) 
+            // this.$router.push({
+            //     name:'viewPage',
+            //     //携带参数时用query，跳转后，url上会拼接参数，刷新页面后参数不会丢失，依然是那个带参数的ur
+            //     query:{
+            //         'obj':parObj
+            //     }
+            // })
+
+            //改进：只携带key，去数据库里fetch
             this.$router.push({
                 name:'viewPage',
                 //携带参数时用query，跳转后，url上会拼接参数，刷新页面后参数不会丢失，依然是那个带参数的ur
                 query:{
-                    'obj':parObj
+                    key:row.key
                 }
             })
         },

@@ -45,6 +45,9 @@
 </template>
 
 <script>
+import {database} from "../../db"
+import {ref,get,child } from "firebase/database";
+
 export default {
     name:"viewPage",
 
@@ -59,9 +62,23 @@ export default {
     methods: {
         getParams(){
             //解决刷新后页面参数消失：需用query把路径拼接到url，再用json parse成对象接受
-            const routerParams = JSON.parse(this.$route.query.obj)
-            this.pageData=routerParams
-        }
+            // const routerParams = JSON.parse(this.$route.query.obj)
+            // this.pageData=routerParams
+
+            //改进：用key去fetch
+            const key = this.$route.query.key
+            const dbRef = ref(database);
+            get(child(dbRef, `product/${key}`)).then((snapshot) => {
+                if (snapshot.exists()) {
+                    console.log(snapshot.val());
+                    this.pageData=snapshot.val()
+                } else {
+                    console.log("No data available");
+                }
+                }).catch((error) => {
+                console.error(error);
+                });
+        },
     },
 
 }
